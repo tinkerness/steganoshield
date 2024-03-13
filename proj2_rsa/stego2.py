@@ -25,8 +25,14 @@ def create_user():
     if username in user_data:
         print("User already exists!")
         return
+    
+    # Generate RSA key pair
+    key = RSA.generate(2048)
+    private_key = key.export_key()
+    public_key = key.publickey().export_key()
 
-    user_data[username] = {"password": password}
+    # Store user data including keys
+    user_data[username] = {"password": password, "private_key": private_key.decode(), "public_key": public_key.decode()}
     save_user_data(user_data)
     print("User created successfully!")
 
@@ -43,18 +49,18 @@ def login():
     print("Login successful!")
     return username
 
-# Function to generate RSA key pair for a user
-def generate_key_pair(username):
-    key = RSA.generate(2048)
-    private_key = key.export_key()
-    public_key = key.publickey().export_key()
+# # Function to generate RSA key pair for a user
+# def generate_key_pair(username):
+#     key = RSA.generate(2048)
+#     private_key = key.export_key()
+#     public_key = key.publickey().export_key()
 
-    user_data = load_user_data()
-    user_data[username]["private_key"] = private_key.decode()
-    user_data[username]["public_key"] = public_key.decode()
-    save_user_data(user_data)
+#     user_data = load_user_data()
+#     user_data[username]["private_key"] = private_key.decode()
+#     user_data[username]["public_key"] = public_key.decode()
+#     save_user_data(user_data)
 
-    print("RSA key pair generated successfully!")
+#     print("RSA key pair generated successfully!")
 
 # Function to encrypt a message
 def encrypt_message(message, recipient_public_key):
@@ -63,10 +69,15 @@ def encrypt_message(message, recipient_public_key):
     return encrypted_message
 
 # Function to decrypt a message
-def decrypt_message(encrypted_message, private_key):
-    cipher = PKCS1_OAEP.new(RSA.import_key(private_key))
-    decrypted_message = cipher.decrypt(encrypted_message).decode()
-    return decrypted_message
+def decrypt_message(encrypted_message, private_key, intended_recipient):
+    try:  
+        cipher = PKCS1_OAEP.new(RSA.import_key(private_key))
+        decrypted_message = cipher.decrypt(encrypted_message).decode()
+        return decrypted_message
+    except ValueError as e:
+        print("Decryption error:", e)
+        if private_key != load_user_data()[intended_recipient]["private_key"]:
+            raise ValueError("Invalid key")
 
 # Function to save encrypted message to a file
 def save_encrypted_message_to_file(filename, encrypted_message):
@@ -92,7 +103,7 @@ if __name__ == "__main__":
         elif choice == "2":
             username = login()
             if username:
-                generate_key_pair(username)
+                # generate_key_pair(username)
                 # Other functionalities like encryption and decryption can be added here
 
                 while True:
@@ -119,11 +130,16 @@ if __name__ == "__main__":
                         # encrypted_message = input("Enter encrypted message in hexadecimal format: ")
                         filename = input("Enter the filename containing the encrypted message: ")
                         user_data = load_user_data()
+                        # find intended recipient
+                        intended_recipient = filename.split("_to_")[1].split(".")[0]
                         private_key = user_data[username]["private_key"]
                         encrypted_message = read_encrypted_message_from_file(filename)
-                        print("Encrypted message:", encrypted_message)  # Debugging statement
-                        decrypted_message = decrypt_message(encrypted_message, private_key)
-                        print("Decrypted message:", decrypted_message)  # Debugging statement
+                        # print("Encrypted message:", encrypted_message)  # Debugging statement
+                        try:
+                            decrypted_message = decrypt_message(encrypted_message, private_key, intended_recipient)
+                            print("Decrypted message:", decrypted_message)  # Debugging statement
+                        except ValueError as e:
+                            print("Error:", e)
                     
                     elif option == "3":
                         break

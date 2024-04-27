@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+    <div id="navbar"></div>
     <h1>Encrypt</h1>
     <div class="cardstyle">
         <form method="" action="dashboard.html">
@@ -20,5 +21,26 @@
             <button type="submit">Encrypt</button>
         </form>
     </div>
+    <script>
+        // Fetch and include the navigation bar using JavaScript
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Set the active state of the current page's navigation item
+                setActiveNavItem();
+            });
+
+        function setActiveNavItem() {
+            // Get the current URL path
+            var path = window.location.pathname;
+            // Find the corresponding link in the navigation bar and add the 'active' class
+            document.querySelectorAll('.nav-item a').forEach(function(elem) {
+                if (elem.getAttribute('href') === path) {
+                    elem.parentNode.classList.add('active');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

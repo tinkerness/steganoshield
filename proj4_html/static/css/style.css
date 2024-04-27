@@ -1,0 +1,56 @@
+body {
+    margin: 50px;
+    background-image: url(../images/bg_image.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: justify;
+    padding: 20px;
+}
+h1{
+    font-size: 36px;
+    text-align: center;
+}
+button, .btn_style{
+    background-color: #1961ad;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 0 auto;
+    display: block;
+}
+button:hover{
+    background-color: #114277;
+}
+button a{
+    color: white;
+    text-decoration: none;
+}
+p{
+    font-size: 16px;
+    line-height: 1.5;
+}
+.cardstyle {
+    /* border: black 1px solid; */
+    margin: 10px auto;
+    padding: 20px;
+    display: block;
+    /* width: 80vh; */
+    text-align: center;
+}
+
+.cardstyle ul{
+    list-style-type: none;
+    padding: 10px;
+}
+.cardstyle ul li{
+    border: #114277 1px solid;
+    margin: 10px;
+    padding: 10px;
+    font-size: 18px;
+}

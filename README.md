@@ -10,12 +10,18 @@
 
 ## Tech Stack Used
 - Python
+- HTML
+- CSS
 - Flask
 - Firebase
 - Figma
 
+## Project Status
+- Completed RSA encryption algorithm [view](/proj2_rsa/README.md)
+- Implemented steganography techniques for data embedding [view](/proj3_steganography/README.md)
+- Completed UI design [view](/proj4_html/README.md)
+
 ## Future Plans
-- Develop UI
 - Connect to Firebase database
 
 ## Team Members

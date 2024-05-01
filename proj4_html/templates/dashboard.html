@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div id="navbar"></div>
+    <div id="navbar">{% include 'navbar.html' %}</div>
     <h2>Send Messages Securely through SteganoShield!!</h2>
     <div class="container">
         <div class="cardstyle">
@@ -46,13 +46,7 @@
     <!-- javascript -->
     <script>
         // Fetch and include the navigation bar using JavaScript
-        fetch('navbar.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('navbar').innerHTML = data;
-                // Set the active state of the current page's navigation item
-                setActiveNavItem();
-            });
+        
 
         function setActiveNavItem() {
             // Get the current URL path
@@ -64,6 +58,8 @@
                 }
             });
         }
+
+        setActiveNavItem();
     </script>
 </body>
 

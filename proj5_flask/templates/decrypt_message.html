@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decrypt</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="navbar"></div>
+    <h1>Decrypt</h1>
+    <div class="cardstyle">
+        <form method="" action="/dashboard">
+            <label for="cover_image">Upload the received Image:</label><br/><br/>
+            <input type="file" id="cover_image" name="cover_image" style="border: 1px solid rgba(54, 54, 54, 0.5); padding: 10px;">
+            <br/><br/>
+            <button type="submit">Decrypt</button>
+        </form>
+    </div>
+    <script>
+        // Fetch and include the navigation bar using JavaScript
+        fetch('/navbar')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Set the active state of the current page's navigation item
+                setActiveNavItem();
+            });
+
+        function setActiveNavItem() {
+            // Get the current URL path
+            var path = window.location.pathname;
+            // Find the corresponding link in the navigation bar and add the 'active' class
+            document.querySelectorAll('.nav-item a').forEach(function(elem) {
+                if (elem.getAttribute('href') === path) {
+                    elem.parentNode.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

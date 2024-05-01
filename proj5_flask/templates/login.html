@@ -3,6 +3,7 @@
 <head>
     <title>Login</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <nav class="navbar1">
@@ -12,11 +13,11 @@
     <h1>Login</h1>
 
     <div class="cardstyle">
-        <form action="/login" method='POST'>
+        <form method="" action="/dashboard">
             <div class="input-row">
-                <div class="label-column">Email:</div>
+                <div class="label-column">Username:</div>
                 <div class="input-column">
-                  <input type="text" id="email" name="email">
+                  <input type="text" id="username" name="username">
                 </div>
             </div>
             <div class="input-row">

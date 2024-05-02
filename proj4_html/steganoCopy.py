@@ -49,7 +49,7 @@ def loginUser(user, pw):
 def encrypt_message(message, recipient_public_key):
     cipher = PKCS1_OAEP.new(RSA.import_key(recipient_public_key))
     encrypted_message = cipher.encrypt(message.encode())
-    print("encrypted_message : ",encrypted_message)
+    # print("encrypted_message : ",encrypted_message)
     return encrypted_message
 
 def save_encrypted_message_to_file(filename, encrypted_message):
@@ -64,7 +64,8 @@ def read_encrypted_message_from_file(filename):
     return encrypted_message
 
 # Function to hide encrypted message in an image using steganography
-def hide_message_in_image(encrypted_message, cover_image_filename, stego_image_filename):
+# def hide_message_in_image(encrypted_message, cover_image_filename, stego_image_filename):
+def hide_message_in_image(encrypted_message, cover_image_filename):
     cover_image = cover_image_filename
     # print("1.41.encrypted_message to hide : ",encrypted_message)
 
@@ -72,9 +73,9 @@ def hide_message_in_image(encrypted_message, cover_image_filename, stego_image_f
     # print("1.5.encrypt_message_b64 to hide : ",encrypted_message)
 
     stego_image = lsb.hide(cover_image, encrypted_message_b64)
-    stego_image.save(stego_image_filename)
-    print("Message encrypted and hidden in the image successfully!")
+    # print("Message encrypted and hidden in the image successfully!")
     # print("1.6.stego_image_filename : ",stego_image_filename)
+    return stego_image
 
 def decrypt_message(encrypted_message, private_key, intended_recipient):
     try:  

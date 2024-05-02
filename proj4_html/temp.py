@@ -106,88 +106,71 @@ def decrypt():
 # -----------notifications------------
 @app.route('/notifications')
 def notifications():
-    if is_user_authenticated():
-        try:
-            # Retrieve user data
-            user_data = db.child("users").child(session['user']['localId']).get().val()
-            if user_data:
-                username = user_data['username']
-                user_id = session['user']['localId']
+    return render_template('notifications.html')
 
-                # Retrieve notifications for the user
-                notifications_dict = db.child("notifications").child(user_id).get().val() or {}
-                notifications_list = []
-
-                # Convert the dictionary to a list of dictionaries
-                for notification_id, notification_data in notifications_dict.items():
-                    notifications_list.append(notification_data)
-
-                return render_template('notifications.html', username=username, notifications=notifications_list)
-            else:
-                # Handle case where user data is not found
-                return render_template('error.html', message="User data not found.")
-        except Exception as e:
-            print(f"Error retrieving user data or notifications: {e}")
-            return render_template('error.html', message="An error occurred. Please try again later.")
-    else:
-        return redirect('/login')
 
 # Set the upload folder for cover images
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # -----------dashboard---------------
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    try:
+        if is_user_authenticated():
+            user_data = db.child("users").child(session['user']['localId']).get().val()
+            username = user_data['username']
+            sender_id = session['user']['localId']  # Get the sender's user ID
 
-# @app.route('/dashboard', methods=['GET', 'POST'])
-# def dashboard():
-#     if is_user_authenticated():
-#         user_data = db.child("users").child(session['user']['localId']).get().val()
-#         username = user_data['username']
-#         sender_id = session['user']['localId']  # Get the sender's user ID
+            if request.method == 'POST':
+                recipient = request.form.get('recipient')
+                message = request.form.get('message')
+                cover_image = request.files.get('cover_image')
 
-#         if request.method == 'POST':
-#             recipient = request.form.get('recipient')
-#             message = request.form.get('message')
-#             cover_image = request.files.get('cover_image')
+                if recipient and message and cover_image:
+                    cover_image_filename = secure_filename(cover_image.filename)
+                    cover_image_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_image_filename)
+                    cover_image.save(cover_image_path)
 
-#             if recipient and message and cover_image:
-#                 cover_image_filename = secure_filename(cover_image.filename)
-#                 cover_image_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_image_filename)
-#                 cover_image.save(cover_image_path)
+                    recipient_public_key = db.child("users").order_by_child("username").equal_to(recipient).get().val()
+                    if recipient_public_key:
+                        recipient_public_key = list(recipient_public_key.values())[0]['public_key']
+                        recipient_id = list(recipient_public_key.keys())[0]  # Get the recipient's user ID
+                    else:
+                        return 'Recipient not found!'
 
-#                 recipient_public_key = db.child("users").order_by_child("username").equal_to(recipient).get().val()
-#                 if recipient_public_key:
-#                     recipient_public_key = list(recipient_public_key.values())[0]['public_key']
-#                     recipient_id = list(recipient_public_key.keys())[0]  # Get the recipient's user ID
-#                 else:
-#                     return 'Recipient not found!'
+                    user_data = load_user_data()
+                    sender_private_key = user_data[username]['private_key']
 
-#                 user_data = load_user_data()
-#                 sender_private_key = user_data[username]['private_key']
+                    encrypted_message = encrypt_message(message, recipient_public_key)
 
-#                 encrypted_message = encrypt_message(message, recipient_public_key)
+                    stego_image_filename = f"{username}_to_{recipient}_stego.png"
+                    stego_image_path = os.path.join('stego_images', stego_image_filename)
+                    hide_message_in_image(encrypted_message, cover_image_path, stego_image_path)
 
-#                 stego_image_filename = f"{username}_to_{recipient}_stego.png"
-#                 stego_image_path = os.path.join('stego_images', stego_image_filename)
-#                 hide_message_in_image(encrypted_message, cover_image_path, stego_image_path)
+                    # Store the steganographic image path in the recipient's notifications
+                    notification_data = {
+                        'sender_id': sender_id,
+                        'sender_username': username,
+                        'message': message,
+                        'stego_image_path': stego_image_path
+                    }
+                    db.child("notifications").child(recipient_id).push(notification_data)
 
-#                 # Store the steganographic image path in the recipient's notifications
-#                 notification_data = {
-#                     'sender_id': sender_id,
-#                     'sender_username': username,
-#                     'message': message,
-#                     'stego_image_path': stego_image_path
-#                 }
-#                 db.child("notifications").child(recipient_id).push(notification_data)
+                    return 'Message encrypted and hidden in the image successfully!'
 
-#                 return 'Message encrypted and hidden in the image successfully!'
+            return render_template('dashboard.html', username=username)
+        else:
+            return redirect('/login')
+    except Exception as e:
+        print(e)
+        return "Internal Server Error", 500
 
-#         return render_template('dashboard.html', username=username)
-#     else:
-#         return redirect('/login')
-
-from flask import flash
-
+if __name__ == '__main__':
+    app.run(port=1111) 
+    
+    
+    
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if is_user_authenticated():
@@ -210,8 +193,7 @@ def dashboard():
                     recipient_public_key = list(recipient_public_key.values())[0]['public_key']
                     recipient_id = list(recipient_public_key.keys())[0]  # Get the recipient's user ID
                 else:
-                    flash('Recipient not found!', 'error')
-                    return render_template('dashboard.html', username=username)
+                    return 'Recipient not found!'
 
                 user_data = load_user_data()
                 sender_private_key = user_data[username]['private_key']
@@ -231,11 +213,8 @@ def dashboard():
                 }
                 db.child("notifications").child(recipient_id).push(notification_data)
 
-                flash('Message encrypted and hidden in the image successfully!', 'success')
+                return 'Message encrypted and hidden in the image successfully!'
 
         return render_template('dashboard.html', username=username)
     else:
         return redirect('/login')
-
-if __name__ == '__main__':
-    app.run(port=1111)

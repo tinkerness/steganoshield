@@ -8,6 +8,15 @@
     <div id="navbar">{% include 'navbar.html' %}</div>
     <h1>hello {{ username }} 👋 Welcome To SteganoShield!</h1>
     <h2>Send Messages Securely through SteganoShield!!</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
     <div class="container">
         <div class="cardstyle">
             <form method="POST" enctype="multipart/form-data">

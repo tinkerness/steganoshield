@@ -9,15 +9,15 @@
     <h1>Notifications for {{ username }}</h1>
 
     {% if notifications %}
-        {% for notification in notifications.values() %}
-            <div class="notification">
-                <p>From: {{ notification.sender_username }}</p>
-                <p>Message: {{ notification.message }}</p>
-                <p>Steganographic Image: <a href="{{ notification.stego_image_path }}" download>Download</a></p>
-            </div>
-        {% endfor %}
+    {% for notification in notifications %}
+    <div class="notification">
+        <p>From: {{ notification.sender_username }}</p>
+        <p>Message: {{ notification.message }}</p>
+        <p>Steganographic Image: <a href="{{ notification.stego_image_path }}" download>Download</a></p>
+    </div>
+    {% endfor %}
     {% else %}
-        <p>No notifications found.</p>
+    <p>No notifications found.</p>
     {% endif %}
 
     <!-- Footer -->

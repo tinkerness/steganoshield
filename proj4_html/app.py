@@ -107,16 +107,30 @@ def decrypt():
 @app.route('/notifications')
 def notifications():
     if is_user_authenticated():
-        user_data = db.child("users").child(session['user']['localId']).get().val()
-        username = user_data['username']
-        user_id = session['user']['localId']
+        try:
+            # Retrieve user data
+            user_data = db.child("users").child(session['user']['localId']).get().val()
+            if user_data:
+                username = user_data['username']
+                user_id = session['user']['localId']
 
-        notifications = db.child("notifications").child(user_id).get().val()
+                # Retrieve notifications for the user
+                notifications_dict = db.child("notifications").child(user_id).get().val() or {}
+                notifications_list = []
 
-        return render_template('notifications.html', username=username, notifications=notifications)
+                # Convert the dictionary to a list of dictionaries
+                for notification_id, notification_data in notifications_dict.items():
+                    notifications_list.append(notification_data)
+
+                return render_template('notifications.html', username=username, notifications=notifications_list)
+            else:
+                # Handle case where user data is not found
+                return render_template('error.html', message="User data not found.")
+        except Exception as e:
+            print(f"Error retrieving user data or notifications: {e}")
+            return render_template('error.html', message="An error occurred. Please try again later.")
     else:
         return redirect('/login')
-
 
 # Set the upload folder for cover images
 app.config['UPLOAD_FOLDER'] = 'uploads'

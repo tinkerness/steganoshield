@@ -6,17 +6,30 @@
 </head>
 <body>
     <div id="navbar">{% include 'navbar.html' %}</div>
-    <h1>Notifications</h1>
-    <div class="cardstyle">
-        <ul>
-            <li>Message from: Alice</li>
-            <li>Message from: Bob</li>
-            <li>Message from: Charlie</li>
-        </ul>
-    </div>
-    <button><a href="dashboard.html">Back to Dashboard</a></button>
-    <script>
+    <h1>Notifications for {{ username }}</h1>
 
+    {% if notifications %}
+        {% for notification in notifications.values() %}
+            <div class="notification">
+                <p>From: {{ notification.sender_username }}</p>
+                <p>Message: {{ notification.message }}</p>
+                <p>Steganographic Image: <a href="{{ notification.stego_image_path }}" download>Download</a></p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No notifications found.</p>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Brought to you by SteganoShield</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Fetch and include the navigation bar using JavaScript
         function setActiveNavItem() {
             // Get the current URL path
             var path = window.location.pathname;
@@ -27,8 +40,7 @@
                 }
             });
         }
-
-        setActiveNavItem()
+        setActiveNavItem();
     </script>
 </body>
 </html>

@@ -6,48 +6,46 @@
 </head>
 <body>
     <div id="navbar">{% include 'navbar.html' %}</div>
+    <h1>hello {{ username }} 👋 Welcome To SteganoShield!</h1>
     <h2>Send Messages Securely through SteganoShield!!</h2>
     <div class="container">
         <div class="cardstyle">
-          <div class="input-row">
-            <div class="label-column">User Id (recipient)</div>
-            <div class="input-column">
-              <input type="text" placeholder="e.g: User Id of Recipient e.g. Alie0123">
-            </div>
-          </div>
-          <div class="input-row">
-            <div class="label-column">Text to Hide</div>
-            <div class="input-column">
-              <input type="text" placeholder="e.g: Hi there, I'm using SteganoShield">
-            </div>
-          </div>
-          <div class="input-row">
-            <div class="label-column">Choose image file</div>
-            <div class="input-column">
-              <div class="file-input">
-                <input type="file" id="cover_image" name="cover_image" accept="image/*">
-                <label for="cover_image">Choose image (e.g: .jpg or .png)</label>
-              </div>
-            </div>
-          </div>
-          <div class="button-row">
-            <button class="send-btn">Send</button>
-          </div>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="input-row">
+                    <div class="label-column">User Id (recipient)</div>
+                    <div class="input-column">
+                        <input type="text" name="recipient" placeholder="e.g: User Id of Recipient e.g. Alie0123" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="label-column">Text to Hide</div>
+                    <div class="input-column">
+                        <input type="text" name="message" placeholder="e.g: Hi there, I'm using SteganoShield" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="label-column">Choose image file</div>
+                    <div class="input-column">
+                        <div class="file-input">
+                            <input type="file" id="cover_image" name="cover_image" accept="image/*" required>
+                            <label for="cover_image">Choose image (e.g: .jpg or .png)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="send-btn">Send</button>
+                </div>
+            </form>
         </div>
-      </div>
-
+    </div>
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <p>Brought to you by SteganoShield</p>
         </div>
     </footer>
-
-    <!-- javascript -->
+    <!-- JavaScript -->
     <script>
-        // Fetch and include the navigation bar using JavaScript
-        
-
         function setActiveNavItem() {
             // Get the current URL path
             var path = window.location.pathname;
@@ -58,9 +56,7 @@
                 }
             });
         }
-
         setActiveNavItem();
     </script>
 </body>
-
 </html>

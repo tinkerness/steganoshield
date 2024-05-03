@@ -2,18 +2,12 @@ from flask import Flask, flash, session, render_template, request, redirect
 import pyrebase
 from werkzeug.utils import secure_filename
 import os
-<<<<<<< HEAD
-
-from steganoCopy import create_user, extract_and_decrypt_message, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image
-
-=======
 import firebase_admin
 from firebase_admin import credentials, storage
 from steganoCopy import create_user, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image, extract_and_decrypt_message
 import time
 from io import BytesIO
 from PIL import Image
->>>>>>> b38d942c07f0db500011c6983781ed006bb30b92
 
 app = Flask(__name__)
 config = {
@@ -113,7 +107,6 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
-<<<<<<< HEAD
 # ------------decrypt----------------
 @app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt():
@@ -138,7 +131,6 @@ def decrypt():
         return render_template('decrypt_message.html')
     else:
         return redirect('/login')
-=======
 # Assuming Firebase Admin SDK is already initialized
 def get_storage_bucket():
     # Returns the Firebase Storage bucket
@@ -161,7 +153,6 @@ def get_stego_image_blob(filename):
     # Create a blob for this path
     bucket = get_storage_bucket()
     return bucket.blob(path)
->>>>>>> b38d942c07f0db500011c6983781ed006bb30b92
 
 # -----------notifications------------
 @app.route('/notifications')
@@ -309,45 +300,45 @@ def dashboard():
     else:
         return redirect('/login')
     
-# ------------decrypt----------------
-@app.route('/decrypt')
-def decrypt():
-    if is_user_authenticated():
-        user_data = db.child("users").child(session['user']['localId']).get().val()
-        username = user_data['username']
-        private_key = user_data['private_key']
-        # print('receiver: ', username , ', private key: ', private_key)
+# # ------------decrypt----------------
+# @app.route('/decrypt')
+# def decrypt():
+#     if is_user_authenticated():
+#         user_data = db.child("users").child(session['user']['localId']).get().val()
+#         username = user_data['username']
+#         private_key = user_data['private_key']
+#         # print('receiver: ', username , ', private key: ', private_key)
 
-        if request.method == 'POST':
-            stego_image = request.files.get('cover_image')
+#         if request.method == 'POST':
+#             stego_image = request.files.get('cover_image')
 
-            if stego_image:
-                print('Received stego_image')
-                stego_image_filename = secure_filename(stego_image.filename)
-                stego_image_path = os.path.join(app.config['STEGO_FOLDER'], stego_image_filename)
-                stego_image.save(stego_image_path)
-                print('Stego image saved successfully in path: ',stego_image_path,'!')
+#             if stego_image:
+#                 print('Received stego_image')
+#                 stego_image_filename = secure_filename(stego_image.filename)
+#                 stego_image_path = os.path.join(app.config['STEGO_FOLDER'], stego_image_filename)
+#                 stego_image.save(stego_image_path)
+#                 print('Stego image saved successfully in path: ',stego_image_path,'!')
 
-                decrypted_message = extract_and_decrypt_message(stego_image_path, private_key, username)
-                print('Decrypted message:', decrypted_message)
-                return 'Message decrypted successfully!'
-        # # Check if a file was uploaded
-        # if 'cover_image' in request.files:
-        #     file = request.files['cover_image']
-        #     filename = secure_filename(file.filename)
-        #     file.save(filename)
+#                 decrypted_message = extract_and_decrypt_message(stego_image_path, private_key, username)
+#                 print('Decrypted message:', decrypted_message)
+#                 return 'Message decrypted successfully!'
+#         # # Check if a file was uploaded
+#         # if 'cover_image' in request.files:
+#         #     file = request.files['cover_image']
+#         #     filename = secure_filename(file.filename)
+#         #     file.save(filename)
 
-        #     try:
-        #         # Now you can call the extract_and_decrypt_message() function
-        #         message = extract_and_decrypt_message(filename)
-        #         # Do something with the decrypted message...
-        #         return 'Message decrypted'
-        #     except Exception as e:
-        #         # If an error occurred, return an error message
-        #         return 'An error occurred: ' + str(e)
-        # print('No file uploaded')
+#         #     try:
+#         #         # Now you can call the extract_and_decrypt_message() function
+#         #         message = extract_and_decrypt_message(filename)
+#         #         # Do something with the decrypted message...
+#         #         return 'Message decrypted'
+#         #     except Exception as e:
+#         #         # If an error occurred, return an error message
+#         #         return 'An error occurred: ' + str(e)
+#         # print('No file uploaded')
 
-    return render_template('decrypt_message.html')
+#     return render_template('decrypt_message.html')
 
 if __name__ == '__main__':
     app.run(port=1111)

@@ -91,15 +91,14 @@ def decrypt_message(encrypted_message, private_key, intended_recipient):
             print("An error occurred during decryption!")
 
 # Function to extract and decrypt message from stego image
-def extract_and_decrypt_message(stego_image_filename, private_key, intended_recipient):
-    encrypted_message_b64 = lsb.reveal(stego_image_filename)
-    print("2.11.revealed encrypted_message_b64 : ",encrypted_message_b64)
+def extract_and_decrypt_message(stego_image_path, private_key, intended_recipient):
+    encrypted_message_b64 = lsb.reveal(stego_image_path)
+    print("2.11.revealed encrypted_message_b64 : ", encrypted_message_b64)
 
     encrypted_message = base64.b64decode(encrypted_message_b64)
-    print("2.12.revealed encrypted_message : ",encrypted_message)
+    print("2.12.revealed encrypted_message : ", encrypted_message)
 
     decrypted_message = decrypt_message(encrypted_message, private_key, intended_recipient)
-    # print("2.3.decrypted_message : ",decrypted_message)
     return decrypted_message
 
 

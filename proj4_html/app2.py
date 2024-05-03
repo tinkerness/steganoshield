@@ -3,7 +3,7 @@ import pyrebase
 from werkzeug.utils import secure_filename
 import os
 
-from steganoCopy import create_user, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image
+from steganoCopy import create_user, extract_and_decrypt_message, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image
 
 
 app = Flask(__name__)
@@ -100,9 +100,29 @@ def logout():
     return redirect('/')
 
 # ------------decrypt----------------
-@app.route('/decrypt')
+@app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt():
-    return render_template('decrypt_message.html')
+    if is_user_authenticated():
+        if request.method == 'POST':
+            stego_image = request.files.get('stego_image')
+            if stego_image:
+                stego_image_filename = secure_filename(stego_image.filename)
+                stego_image_path = os.path.join(app.config['UPLOAD_FOLDER'], stego_image_filename)
+                stego_image.save(stego_image_path)
+
+                user_data = db.child("users").child(session['user']['localId']).get().val()
+                username = user_data['username']
+                private_key = load_user_data()[username]['private_key']
+
+                try:
+                    decrypted_message = extract_and_decrypt_message(stego_image_path, private_key, username)
+                    return render_template('decrypt_message.html', decrypted_message=decrypted_message)
+                except Exception as e:
+                    print(f"Error decrypting message: {e}")
+                    return render_template('decrypt_message.html', error_message="Failed to decrypt the message.")
+        return render_template('decrypt_message.html')
+    else:
+        return redirect('/login')
 
 # -----------notifications------------
 @app.route('/notifications')

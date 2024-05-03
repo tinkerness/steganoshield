@@ -8,15 +8,19 @@
     <div id="navbar">{% include 'navbar.html' %}</div>
     <h1>Decrypt</h1>
     <div class="cardstyle">
-        <form method="" action="dashboard.html">
-            <label for="cover_image">Upload the received Image:</label><br/><br/>
-            <input type="file" id="cover_image" name="cover_image" style="border: 1px solid rgba(54, 54, 54, 0.5); padding: 10px;">
+        <form method="POST" action="{{ url_for('decrypt') }}" enctype="multipart/form-data">
+            <label for="stego_image">Upload the received Image:</label><br/><br/>
+            <input type="file" id="stego_image" name="stego_image" style="border: 1px solid rgba(54, 54, 54, 0.5); padding: 10px;">
             <br/><br/>
             <button type="submit">Decrypt</button>
         </form>
+        {% if decrypted_message %}
+            <p>Decrypted Message: {{ decrypted_message }}</p>
+        {% elif error_message %}
+            <p>{{ error_message }}</p>
+        {% endif %}
     </div>
     <script>
-
         function setActiveNavItem() {
             // Get the current URL path
             var path = window.location.pathname;
@@ -27,7 +31,6 @@
                 }
             });
         }
-
         setActiveNavItem()
     </script>
 </body>

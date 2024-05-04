@@ -107,7 +107,7 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
-# ------------decrypt----------------
+# ------------decrypt----------------    
 @app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt():
     if is_user_authenticated():
@@ -131,6 +131,7 @@ def decrypt():
         return render_template('decrypt_message.html')
     else:
         return redirect('/login')
+    
 # Assuming Firebase Admin SDK is already initialized
 def get_storage_bucket():
     # Returns the Firebase Storage bucket
@@ -192,7 +193,6 @@ app.config['STEGO_FOLDER'] = 'stego_images'
 os.makedirs(app.config['STEGO_FOLDER'], exist_ok=True)
 
 # -----------dashboard---------------
-
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if is_user_authenticated():
@@ -254,7 +254,9 @@ def dashboard():
                 stego_image_stream.seek(0)  # Reset stream to beginning
 
                 # Get a blob for the stego image in the 'stego_images' folder
-                stego_image_blob = get_stego_image_blob(f"{username}_to_{recipient}_stego.png")
+                # stego_image_blob = get_stego_image_blob(f"{username}_to_{recipient}_stego.png")
+                timestamp = int(time.time())
+                stego_image_blob = get_stego_image_blob(f"{username}_to_{recipient}_{timestamp}_stego.png")
 
                 # Upload the stego image from the byte stream
                 stego_image_blob.upload_from_file(stego_image_stream)
@@ -294,51 +296,13 @@ def dashboard():
                 }
                 print('notification_data : ',notification_data)
                 db.child("notifications").child(recipient_id).push(notification_data)
-                return 'Message encrypted and hidden in the image successfully!'
+                # return 'Message encrypted and hidden in the image successfully!'
+                flash('Message encrypted and hidden in the image successfully!')
 
         return render_template('dashboard.html', username=username)
     else:
         return redirect('/login')
-    
-# # ------------decrypt----------------
-# @app.route('/decrypt')
-# def decrypt():
-#     if is_user_authenticated():
-#         user_data = db.child("users").child(session['user']['localId']).get().val()
-#         username = user_data['username']
-#         private_key = user_data['private_key']
-#         # print('receiver: ', username , ', private key: ', private_key)
 
-#         if request.method == 'POST':
-#             stego_image = request.files.get('cover_image')
-
-#             if stego_image:
-#                 print('Received stego_image')
-#                 stego_image_filename = secure_filename(stego_image.filename)
-#                 stego_image_path = os.path.join(app.config['STEGO_FOLDER'], stego_image_filename)
-#                 stego_image.save(stego_image_path)
-#                 print('Stego image saved successfully in path: ',stego_image_path,'!')
-
-#                 decrypted_message = extract_and_decrypt_message(stego_image_path, private_key, username)
-#                 print('Decrypted message:', decrypted_message)
-#                 return 'Message decrypted successfully!'
-#         # # Check if a file was uploaded
-#         # if 'cover_image' in request.files:
-#         #     file = request.files['cover_image']
-#         #     filename = secure_filename(file.filename)
-#         #     file.save(filename)
-
-#         #     try:
-#         #         # Now you can call the extract_and_decrypt_message() function
-#         #         message = extract_and_decrypt_message(filename)
-#         #         # Do something with the decrypted message...
-#         #         return 'Message decrypted'
-#         #     except Exception as e:
-#         #         # If an error occurred, return an error message
-#         #         return 'An error occurred: ' + str(e)
-#         # print('No file uploaded')
-
-#     return render_template('decrypt_message.html')
 
 if __name__ == '__main__':
     app.run(port=1111)

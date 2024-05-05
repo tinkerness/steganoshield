@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Notifications</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
     <div id="navbar">{% include 'navbar.html' %}</div>
     <h1>Notifications for {{ username }}</h1>
 
-    {% if notifications %}
-    {% for notification in notifications %}
-    <div class="notification">
-        <p>From: {{ notification.sender_username }}</p>
-        <p>Message: {{ notification.message }}</p>
-        <p>Steganographic Image: <a href="{{ notification.stego_image_path }}" download>Download</a></p>
+    <div class="notifications-container">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification">
+                <div class="notification-header">
+                    <span class="sender">{{ notification.sender_username }}</span>
+                    <span class="timestamp">{{ notification.timestamp }}</span> <!-- Add timestamp -->
+                </div>
+                <div class="notification-body">
+                    <p>Steganographic Image: <a href="{{ notification.stego_image_path }}" download>Download</a></p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No notifications found.</p>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% else %}
-    <p>No notifications found.</p>
-    {% endif %}
-
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
@@ -34,7 +41,7 @@
             // Get the current URL path
             var path = window.location.pathname;
             // Find the corresponding link in the navigation bar and add the 'active' class
-            document.querySelectorAll('.nav-item a').forEach(function(elem) {
+            document.querySelectorAll('.nav-item a').forEach(function (elem) {
                 if (elem.getAttribute('href') === path) {
                     elem.parentNode.classList.add('active');
                 }
@@ -43,4 +50,5 @@
         setActiveNavItem();
     </script>
 </body>
+
 </html>

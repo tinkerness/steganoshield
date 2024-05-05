@@ -177,7 +177,7 @@ def notifications():
                 # Convert the dictionary to a list of dictionaries
                 for notification_id, notification_data in notifications_dict.items():
                     timestamp = notification_data.get('timestamp', 0)
-                    human_readable_timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %I:%M:%S %p')
+                    human_readable_timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %I:%M %p')
                     notification_data['timestamp'] = human_readable_timestamp
                     notifications_list.append(notification_data)
 

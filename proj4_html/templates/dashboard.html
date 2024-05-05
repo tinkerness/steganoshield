@@ -37,7 +37,7 @@
                     <div class="input-column">
                         <div class="file-input">
                             <input type="file" id="cover_image" name="cover_image" accept="image/*" required>
-                            <label for="cover_image">Choose image (e.g: .jpg or .png)</label>
+                            <label for="cover_image" id="file_label">Choose image (e.g: .jpg or .png)</label>
                         </div>
                     </div>
                 </div>
@@ -66,6 +66,16 @@
             });
         }
         setActiveNavItem();
+
+        // Update the file input label when a file is selected
+        document.getElementById("cover_image").addEventListener("input", function () {
+            const label = document.getElementById("file_label");
+            const fileInput = document.getElementById("cover_image");
+            const fileName = fileInput.files.length ? fileInput.files[0].name : "Choose image (e.g: .jpg or .png)";
+            
+            label.textContent = fileName;
+            label.style.color = "black";
+        });
     </script>
 </body>
 </html>

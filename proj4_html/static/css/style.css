@@ -187,7 +187,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
   max-width: 800px; /* Increased max-width */
   margin: 0 auto;
 }
@@ -198,8 +198,7 @@ h2 {
   margin-bottom: 10px;
 }
 
-input[type="text"],
-input[type="file"], input[type="password"] {
+input[type="text"], input[type="file"], input[type="password"] {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
@@ -207,15 +206,19 @@ input[type="file"], input[type="password"] {
   border: none;
   border-radius: 5px;
   color: #000000;
+  box-sizing: border-box;
 }
 
 input[type="text"]::placeholder {
+  font-size: 13px;
   color: #999;
 }
 
 .file-input {
   position: relative;
   display: inline-block;
+  width: 100%; /* Match the width of other input fields */
+  height: 40px; /* Set a custom height */
 }
 
 .file-input input[type="file"] {
@@ -229,12 +232,14 @@ input[type="text"]::placeholder {
 }
 
 .file-input label {
-  display: inline-block;
-  padding: 10px 20px;
+  display: flex;
+  padding: 10px;
   background-color: #ffffff;
-  color: #000000;
+  color: #999;
   border-radius: 5px;
   cursor: pointer;
+  box-sizing: border-box;
+  font-size: 13px;
 }
 
 .send-btn {
@@ -245,6 +250,7 @@ input[type="text"]::placeholder {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 30%;
 }
 
 .send-btn:hover {
@@ -272,4 +278,49 @@ input[type="text"]::placeholder {
 .button-row {
   text-align: right;
   margin-top: 20px;
+}
+
+
+/* Notifications */
+.notifications-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin:auto;
+  padding: 20px;
+  max-width: 600px;
+  width: 80%;
+  border-radius: 10px;
+  /* background-color: rgba(255, 255, 255, 0.9); */
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
+}
+
+.notification {
+  border: 1px solid #afafaf;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px; /* Space between notifications */
+  width: 100%;
+}
+
+.notification-header {
+  display: flex; /* Use flexbox to align content */
+  justify-content: space-between; /* Space out elements */
+  font-weight: bold;
+}
+
+.notification-body {
+  padding-top: 10px; /* Add space between the header and body */
+}
+
+/* Link Styles */
+.notification a {
+  color: #237ee0; /* Matching link color */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.notification:hover {
+  background-color: #636363; /* Change background color on hover */
 }

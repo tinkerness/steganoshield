@@ -1,10 +1,14 @@
-from flask import Flask, session, render_template, request, redirect
+from flask import Flask, flash, session, render_template, request, redirect
 import pyrebase
 from werkzeug.utils import secure_filename
 import os
-
-from steganoCopy import create_user, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image
-
+import firebase_admin
+from firebase_admin import credentials, storage
+from steganoCopy import create_user, loginUser, save_user_data, load_user_data, encrypt_message, hide_message_in_image, extract_and_decrypt_message
+import time
+from datetime import datetime
+from io import BytesIO
+from PIL import Image
 
 app = Flask(__name__)
 config = {
@@ -18,10 +22,16 @@ config = {
     'databaseURL': 'https://steganoshield-default-rtdb.firebaseio.com/'
 }
 
+cred = credentials.Certificate('config/serviceAccountKey.json')
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'steganoshield.appspot.com'
+})
+
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
 db = firebase.database()  # Initialize the Firestore database
 app.secret_key = 'secret'
+
 
 def is_user_authenticated():
     if 'user' in session:
@@ -33,6 +43,7 @@ def is_user_authenticated():
             print(f"Error verifying user: {e}")
             return False
     return False
+
 
 # -----------index-------------------
 @app.route('/')
@@ -56,6 +67,7 @@ def login():
             # Check if the login function returns True
             is_login_successful = loginUser(username, password)
             if is_login_successful:
+                print("Logged in as user:", username)
                 return redirect('/dashboard')
             else:
                 return 'Failed to to login'
@@ -98,10 +110,54 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
-# ------------decrypt----------------
-@app.route('/decrypt')
+# ------------decrypt----------------    
+@app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt():
-    return render_template('decrypt_message.html')
+    if is_user_authenticated():
+        if request.method == 'POST':
+            stego_image = request.files.get('stego_image')
+            if stego_image:
+                stego_image_filename = secure_filename(stego_image.filename)
+                stego_image_path = os.path.join(app.config['UPLOAD_FOLDER'], stego_image_filename)
+                stego_image.save(stego_image_path)
+
+                user_data = db.child("users").child(session['user']['localId']).get().val()
+                username = user_data['username']
+                private_key = load_user_data()[username]['private_key']
+
+                try:
+                    decrypted_message = extract_and_decrypt_message(stego_image_path, private_key, username)
+                    return render_template('decrypt_message.html', decrypted_message=decrypted_message)
+                except Exception as e:
+                    print(f"Error decrypting message: {e}")
+                    return render_template('decrypt_message.html', error_message="Failed to decrypt the message.")
+        return render_template('decrypt_message.html')
+    else:
+        return redirect('/login')
+
+    
+# Assuming Firebase Admin SDK is already initialized
+def get_storage_bucket():
+    # Returns the Firebase Storage bucket
+    return storage.bucket()
+
+def get_cover_image_blob(filename):
+    # Secure the filename to prevent path traversal or invalid characters
+    secure_name = secure_filename(filename)
+    # Define the path in Firebase Storage for cover images
+    path = f"uploads/{secure_name}"
+    # Create a blob for this path
+    bucket = get_storage_bucket()
+    return bucket.blob(path)
+
+def get_stego_image_blob(filename):
+    # Secure the filename
+    secure_name = secure_filename(filename)
+    # Define the path in Firebase Storage for stego images
+    path = f"stego_images/{secure_name}"
+    # Create a blob for this path
+    bucket = get_storage_bucket()
+    return bucket.blob(path)
 
 # -----------notifications------------
 @app.route('/notifications')
@@ -120,6 +176,9 @@ def notifications():
 
                 # Convert the dictionary to a list of dictionaries
                 for notification_id, notification_data in notifications_dict.items():
+                    timestamp = notification_data.get('timestamp', 0)
+                    human_readable_timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %I:%M:%S %p')
+                    notification_data['timestamp'] = human_readable_timestamp
                     notifications_list.append(notification_data)
 
                 return render_template('notifications.html', username=username, notifications=notifications_list)
@@ -136,58 +195,12 @@ def notifications():
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Set the stego folder for stego images
+app.config['STEGO_FOLDER'] = 'stego_images'
+os.makedirs(app.config['STEGO_FOLDER'], exist_ok=True)
+
+
 # -----------dashboard---------------
-
-# @app.route('/dashboard', methods=['GET', 'POST'])
-# def dashboard():
-#     if is_user_authenticated():
-#         user_data = db.child("users").child(session['user']['localId']).get().val()
-#         username = user_data['username']
-#         sender_id = session['user']['localId']  # Get the sender's user ID
-
-#         if request.method == 'POST':
-#             recipient = request.form.get('recipient')
-#             message = request.form.get('message')
-#             cover_image = request.files.get('cover_image')
-
-#             if recipient and message and cover_image:
-#                 cover_image_filename = secure_filename(cover_image.filename)
-#                 cover_image_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_image_filename)
-#                 cover_image.save(cover_image_path)
-
-#                 recipient_public_key = db.child("users").order_by_child("username").equal_to(recipient).get().val()
-#                 if recipient_public_key:
-#                     recipient_public_key = list(recipient_public_key.values())[0]['public_key']
-#                     recipient_id = list(recipient_public_key.keys())[0]  # Get the recipient's user ID
-#                 else:
-#                     return 'Recipient not found!'
-
-#                 user_data = load_user_data()
-#                 sender_private_key = user_data[username]['private_key']
-
-#                 encrypted_message = encrypt_message(message, recipient_public_key)
-
-#                 stego_image_filename = f"{username}_to_{recipient}_stego.png"
-#                 stego_image_path = os.path.join('stego_images', stego_image_filename)
-#                 hide_message_in_image(encrypted_message, cover_image_path, stego_image_path)
-
-#                 # Store the steganographic image path in the recipient's notifications
-#                 notification_data = {
-#                     'sender_id': sender_id,
-#                     'sender_username': username,
-#                     'message': message,
-#                     'stego_image_path': stego_image_path
-#                 }
-#                 db.child("notifications").child(recipient_id).push(notification_data)
-
-#                 return 'Message encrypted and hidden in the image successfully!'
-
-#         return render_template('dashboard.html', username=username)
-#     else:
-#         return redirect('/login')
-
-from flask import flash
-
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if is_user_authenticated():
@@ -201,41 +214,95 @@ def dashboard():
             cover_image = request.files.get('cover_image')
 
             if recipient and message and cover_image:
+                print('Recipient:', recipient)
+                print('Message:', message)
                 cover_image_filename = secure_filename(cover_image.filename)
-                cover_image_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_image_filename)
-                cover_image.save(cover_image_path)
+                # cover_image_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_image_filename)
+                # cover_image.save(cover_image_path)
+                # print('Cover image saved successfully in device path: ',cover_image_path,'!')
 
-                recipient_public_key = db.child("users").order_by_child("username").equal_to(recipient).get().val()
-                if recipient_public_key:
-                    recipient_public_key = list(recipient_public_key.values())[0]['public_key']
-                    recipient_id = list(recipient_public_key.keys())[0]  # Get the recipient's user ID
-                else:
+                # # Reset file stream to beginning
+                # cover_image.seek(0)
+                # # Get a blob for the cover image in the 'uploads' folder
+                cover_image_blob = get_cover_image_blob(cover_image_filename)
+                cover_image_blob.upload_from_file(cover_image)  # Upload the cover image
+                # Optionally make it publicly accessible
+                cover_image_blob.make_public()
+                # Get the public URL of the uploaded cover image
+                cover_image_url = cover_image_blob.public_url
+                print('Cover image uploaded to Firebase Storage at:',cover_image_url,'!')
+
+                
+                result = db.child("users").order_by_child("username").equal_to(recipient).get()
+                if not result.val():
+                    print('Recipient not found in Firestore!')
+    
+                recipient_user_data = list(result.val().values())[0]
+                recipient_id = list(result.val().keys())[0]  # Get the user ID (document key)
+                recipient_public_key = recipient_user_data.get('public_key')
+                # print('public key of receiver: ', recipient_public_key, '\nrecipient_id : ', recipient_id)
+                if not recipient_public_key:
                     flash('Recipient not found!', 'error')
-                    return render_template('dashboard.html', username=username)
-
-                user_data = load_user_data()
-                sender_private_key = user_data[username]['private_key']
+                    print('Recipient public key not found!')
+                
+                # user_data = load_user_data()
+                # sender_private_key = user_data[username]['private_key']
 
                 encrypted_message = encrypt_message(message, recipient_public_key)
+                print("encrypted_message : ",encrypted_message)
 
-                stego_image_filename = f"{username}_to_{recipient}_stego.png"
-                stego_image_path = os.path.join('stego_images', stego_image_filename)
-                hide_message_in_image(encrypted_message, cover_image_path, stego_image_path)
+                # Create the stego image with the cover image and encrypted message
+                cover_image.seek(0)  # Ensure we're at the beginning
+                cover_image_pil = Image.open(cover_image)  # Open the image with PIL
+                stego_image = hide_message_in_image(encrypted_message, cover_image_pil)
+
+                
+                # Save the stego image to a byte stream
+                stego_image_stream = BytesIO()  # In-memory byte stream
+                stego_image.save(stego_image_stream, format="PNG")  # Save the PIL image to the stream
+                stego_image_stream.seek(0)  # Reset stream to beginning
+
+                # Get a blob for the stego image in the 'stego_images' folder
+                # stego_image_blob = get_stego_image_blob(f"{username}_to_{recipient}_stego.png")
+                unix_timestamp = int(time.time())
+                stego_image_timestamp = datetime.fromtimestamp(unix_timestamp).strftime('%Y%m%d-%H:%M:%S')
+                stego_image_blob = get_stego_image_blob(f"{username}_to_{recipient}_{stego_image_timestamp}_stego.png")
+
+                # Upload the stego image from the byte stream
+                stego_image_blob.upload_from_file(stego_image_stream)
+                
+                stego_image_blob.make_public()
+                stego_image_url = stego_image_blob.public_url
+                print('Stego image uploaded to Firebase Storage at:',stego_image_url,'!')
+                print("ts:" ,unix_timestamp, stego_image_timestamp)
+
+                # stego_image_filename = f"{username}_to_{recipient}_stego.png"
+                # # print('cover_image_path : ',cover_image_path, 'stego_image_filename : ',stego_image_filename)
+                # stego_image = hide_message_in_image(encrypted_message, cover_image_path)
+                # # stego_image = hide_message_in_image(encrypted_message, cover_image_url)
+
+                # # stego_image_path = os.path.join('stego_images', stego_image_filename)
+                # stego_image_path = os.path.join(app.config['STEGO_FOLDER'], stego_image_filename)
+                # stego_image.save(stego_image_path)
+                # print('stego image saved successfully in path: ',stego_image_path,'!')
 
                 # Store the steganographic image path in the recipient's notifications
                 notification_data = {
                     'sender_id': sender_id,
                     'sender_username': username,
                     'message': message,
-                    'stego_image_path': stego_image_path
+                    'stego_image_path': stego_image_url,
+                    'timestamp': unix_timestamp  # Current time in seconds since epoch
                 }
+                print('notification_data : ',notification_data)
                 db.child("notifications").child(recipient_id).push(notification_data)
-
-                flash('Message encrypted and hidden in the image successfully!', 'success')
+                # return 'Message encrypted and hidden in the image successfully!'
+                flash('Message encrypted and hidden in the image successfully!')
 
         return render_template('dashboard.html', username=username)
     else:
         return redirect('/login')
+
 
 if __name__ == '__main__':
     app.run(port=1111)

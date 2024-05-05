@@ -1,10 +1,10 @@
 # Project Screenshots
 
-1. Encyption and Decyption
-    ![Encyption and Decyption](../proj2_rsa/ss1.png  "Encyption and Decyption Together")
+1. Encyption
+    ![Encyption](../proj3_steganography/screenshots/encryption.png  "Encyption")
 
 2. Decryption Process by Receiver
-    ![Decyption](../proj2_rsa/ss_rsa1.jpg  "Decryption Process")
+    ![Decyption](../proj3_steganography/screenshots/decryption.png  "Decryption Process")
 
 3. Decryption Process by unauthorised user with Invalid Key
-    ![Decyption](../proj2_rsa/ss_rsa2-eve.jpg  "Decryption Process")
+    ![Decyption](../proj3_steganography/screenshots/decryption_invalidkey.png  "Decryption Process")

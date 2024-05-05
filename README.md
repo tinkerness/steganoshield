@@ -18,12 +18,10 @@
 
 ## Project Status
 - Completed RSA encryption algorithm [view](/proj2_rsa/README.md)
-- Implemented steganography techniques for data embedding [view](/proj3_steganography/README.md)
-- Completed UI design [view](/proj4_html/README.md)
-- Added Flask framework [view](/proj5_flask/README.md)
-
-## Future Plans
-- Connect to database
+- Implemented Steganography techniques for data embedding [view](/proj3_steganography/README.md)
+- Completed UI Design using Figma [view](/designs/README.md#ui-design)
+- Backend Integration with Flask [view](/proj4_html/README.md)
+<!-- - Added Flask framework [view](/proj5_flask/README.md) -->
 
 ## Team Members
 - Anitta Siby

@@ -290,9 +290,10 @@ def dashboard():
                 notification_data = {
                     'sender_id': sender_id,
                     'sender_username': username,
-                    'message': message,
+                    # 'message': message,
                     'stego_image_path': stego_image_url,
-                    'timestamp': unix_timestamp  # Current time in seconds since epoch
+                    'stego_image_timestamp': stego_image_timestamp, # human readable timestamp
+                    'timestamp': unix_timestamp  # Current time in seconds since epoch,
                 }
                 print('notification_data : ',notification_data)
                 db.child("notifications").child(recipient_id).push(notification_data)

@@ -15,7 +15,7 @@
             {% for notification in notifications %}
             <div class="notification">
                 <div class="notification-header">
-                    <span class="sender">{{ notification.sender_username }}</span>
+                    <span class="sender">From: {{ notification.sender_username }}</span>
                     <span class="timestamp">{{ notification.timestamp }}</span> <!-- Add timestamp -->
                 </div>
                 <div class="notification-body">

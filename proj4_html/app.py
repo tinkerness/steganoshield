@@ -181,6 +181,8 @@ def notifications():
                     notification_data['timestamp'] = human_readable_timestamp
                     notifications_list.append(notification_data)
 
+                # Sort the notifications list by timestamp in descending order (most recent first)
+                notifications_list = sorted(notifications_list, key=lambda x: x['timestamp'], reverse=True)
                 return render_template('notifications.html', username=username, notifications=notifications_list)
             else:
                 # Handle case where user data is not found

@@ -17,12 +17,11 @@
 - Figma
 
 ## Project Status
-- Completed RSA encryption algorithm [view](/proj2_rsa/README.md)
+- Completed RSA encryption module [view](/proj2_rsa/README.md)
 - Implemented Steganography techniques for data embedding [view](/proj3_steganography/README.md)
 - Completed UI Design using Figma [view](/designs/README.md#ui-design)
-- Backend Integration with Flask [view](/proj4_html/README.md)
-<!-- - Added Flask framework [view](/proj5_flask/README.md) -->
+- Completed Backend Integration with Flask [view](/proj4_html/README.md)
 
 ## Team Members
-- Anitta Siby
-- Rese Raju
+- [Anitta Siby](https://github.com/tinkerness)
+- [Rese Raju](https://github.com/Reseraju)
